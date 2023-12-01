@@ -26,7 +26,6 @@ int main() {
 			i--;
 		}
 
-		cout << line << " " << stoi(num) << endl;
 		total += stoi(num);
 	}
 
