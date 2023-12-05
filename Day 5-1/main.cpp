@@ -97,10 +97,10 @@ int main() {
             min = i;
     }
 
-    cout << seeds[min] << endl;
-
     auto end = chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+
+    cout << seeds[min] << endl;
 
     cout << duration.count() << " s";
 
