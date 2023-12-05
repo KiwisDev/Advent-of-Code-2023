@@ -6,9 +6,11 @@
 #include <sstream>
 #include <thread>
 
+#include "maps.h"
+
 using namespace std;
 
-void processLine(vector<string>* lines, map<unsigned long, unsigned long>* map);
+void processLine(vector<string>* lines, vector<Maps>* map);
 
 enum Mode {
     SEED_TO_SOIL,
@@ -21,7 +23,7 @@ enum Mode {
 };
 
 int main() {
-    ifstream file("inputs/puzzle.txt");
+    ifstream file("inputs/sample.txt");
     string line;
 
     Mode currentMode = SEED_TO_SOIL;
@@ -29,11 +31,7 @@ int main() {
     vector<unsigned long> seeds;
     
     vector<string> lines[HUMIDITY_TO_LOCATION + 1];
-    map<unsigned long, unsigned long> maps[HUMIDITY_TO_LOCATION + 1];
-
-    thread threads[HUMIDITY_TO_LOCATION + 1];
-
-    vector<unsigned long> results;
+    vector<Maps> maps;
 
     while (getline(file, line)) {
         istringstream ss(line);
@@ -74,63 +72,45 @@ int main() {
         }
     }
 
-    for (int i = 0; i < HUMIDITY_TO_LOCATION + 1; i++) {
-        threads[i] = thread(processLine, &lines[i], &maps[i]);
-    }
+    for (int i = 0; i < 2; i++) {
+        cout << "Step " << i << endl;
+        maps.clear();
+        processLine(&lines[i], &maps);
 
-    for (int i = 0; i < HUMIDITY_TO_LOCATION + 1; i++) {
-        threads[i].join();
-    }
-
-    cout << "Tout est process sa mere" << endl;
-
-    for (int i = 0; i < seeds.size(); i++) {
-        unsigned long temp = seeds[i];
-
-        if (maps[SEED_TO_SOIL].count(temp) > 0) {
-            temp = maps[SEED_TO_SOIL][temp];
+        for (int x = 0; x < maps.size(); x++) {
+            cout << maps[x].dest_start << " " << maps[x].src_start << " " << maps[x].length << endl;
         }
 
-        if (maps[SOIL_TO_FETILIZER].count(temp) > 0) {
-            temp = maps[SOIL_TO_FETILIZER][temp];
+        for (int s = 0; s < seeds.size(); s++) {
+            for (int m = 0; m < maps.size(); m++) {
+                unsigned long mapMax = maps[m].src_start + maps[m].length;
+                if (seeds[s] >= maps[m].src_start && seeds[m] < mapMax) {
+                    cout << seeds[s] << " used map " << maps[m].src_start << " " << mapMax << endl;
+                    unsigned long diff = seeds[s] - maps[m].src_start;
+                    seeds[s] = maps[m].dest_start + diff;
+                }
+            }
         }
 
-        if (maps[FERTILIZER_TO_WATER].count(temp) > 0) {
-            temp = maps[FERTILIZER_TO_WATER][temp];
+        for (int i = 0; i < seeds.size(); i++) {
+            cout << seeds[i] << endl;
         }
 
-        if (maps[WATER_TO_LIGHT].count(temp) > 0) {
-            temp = maps[WATER_TO_LIGHT][temp];
-        }
-
-        if (maps[LIGHT_TO_TEMPERATURE].count(temp) > 0) {
-            temp = maps[LIGHT_TO_TEMPERATURE][temp];
-        }
-
-        if (maps[TEMPERATURE_TO_HUMIDITY].count(temp) > 0) {
-            temp = maps[TEMPERATURE_TO_HUMIDITY][temp];
-        }
-
-        if (maps[HUMIDITY_TO_LOCATION].count(temp) > 0) {
-            temp = maps[HUMIDITY_TO_LOCATION][temp];
-        }
-
-        results.push_back(temp);
+        cout << endl;
     }
 
     int min = 0;
-    for (int i = 1; i < results.size(); i++) {
-        if (results[i] < results[min])
+    for (int i = 1; i < seeds.size(); i++) {
+        if (seeds[i] < seeds[min])
             min = i;
     }
 
-    cout << results[min] << endl;
+    cout << endl << seeds[min] << endl;
 
     return 0;
 }
 
-void processLine(vector<string>* lines, map<unsigned long, unsigned long>* map) {
-    cout << "Process started" << endl;
+void processLine(vector<string>* lines, vector<Maps>* map) {
     for (int i = 0; i < lines->size(); i++) {
         istringstream ss(lines->at(i));
         string buff;
@@ -142,10 +122,8 @@ void processLine(vector<string>* lines, map<unsigned long, unsigned long>* map) 
         unsigned long src_start = stoul(buff);
 
         ss >> buff;
-        unsigned long lenght = stoul(buff);
+        unsigned long length = stoul(buff);
 
-        for (unsigned long j = 0; j < lenght; j++) {
-            map->insert(pair<unsigned long, unsigned long>(src_start + j, dest_start + j));
-        }
+        map->push_back(Maps(src_start, dest_start, length));
     }
 }
