@@ -23,7 +23,7 @@ enum Mode {
 };
 
 int main() {
-    ifstream file("inputs/sample.txt");
+    ifstream file("inputs/puzzle.txt");
     string line;
 
     Mode currentMode = SEED_TO_SOIL;
@@ -72,28 +72,29 @@ int main() {
         }
     }
 
-    for (int i = 0; i < 2; i++) {
+    file.close();
+
+    for (int i = 0; i < HUMIDITY_TO_LOCATION + 1; i++) {
         cout << "Step " << i << endl;
         maps.clear();
         processLine(&lines[i], &maps);
 
-        for (int x = 0; x < maps.size(); x++) {
+        for (int x = 0; x < maps.size(); x++)
             cout << maps[x].dest_start << " " << maps[x].src_start << " " << maps[x].length << endl;
-        }
 
         for (int s = 0; s < seeds.size(); s++) {
             for (int m = 0; m < maps.size(); m++) {
-                unsigned long mapMax = maps[m].src_start + maps[m].length;
-                if (seeds[s] >= maps[m].src_start && seeds[m] < mapMax) {
-                    cout << seeds[s] << " used map " << maps[m].src_start << " " << mapMax << endl;
+                if (seeds[s] >= maps[m].src_start && seeds[s] < maps[m].src_start + maps[m].length) {
+                    cout << seeds[s] << " used map " << maps[m].src_start << " " << maps[m].src_start + maps[m].length << endl;
                     unsigned long diff = seeds[s] - maps[m].src_start;
                     seeds[s] = maps[m].dest_start + diff;
+                    break;
                 }
             }
         }
 
-        for (int i = 0; i < seeds.size(); i++) {
-            cout << seeds[i] << endl;
+        for (int y = 0; y < seeds.size(); y++) {
+            cout << seeds[y] << endl;
         }
 
         cout << endl;
@@ -105,7 +106,7 @@ int main() {
             min = i;
     }
 
-    cout << endl << seeds[min] << endl;
+    cout << seeds[min] << endl;
 
     return 0;
 }
