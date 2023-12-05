@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <thread>
+#include <chrono>
 
 #include "maps.h"
 
@@ -23,6 +23,8 @@ enum Mode {
 };
 
 int main() {
+    auto start = chrono::high_resolution_clock::now();
+
     ifstream file("inputs/puzzle.txt");
     string line;
 
@@ -75,29 +77,18 @@ int main() {
     file.close();
 
     for (int i = 0; i < HUMIDITY_TO_LOCATION + 1; i++) {
-        cout << "Step " << i << endl;
         maps.clear();
         processLine(&lines[i], &maps);
-
-        for (int x = 0; x < maps.size(); x++)
-            cout << maps[x].dest_start << " " << maps[x].src_start << " " << maps[x].length << endl;
 
         for (int s = 0; s < seeds.size(); s++) {
             for (int m = 0; m < maps.size(); m++) {
                 if (seeds[s] >= maps[m].src_start && seeds[s] < maps[m].src_start + maps[m].length) {
-                    cout << seeds[s] << " used map " << maps[m].src_start << " " << maps[m].src_start + maps[m].length << endl;
                     unsigned long diff = seeds[s] - maps[m].src_start;
                     seeds[s] = maps[m].dest_start + diff;
                     break;
                 }
             }
         }
-
-        for (int y = 0; y < seeds.size(); y++) {
-            cout << seeds[y] << endl;
-        }
-
-        cout << endl;
     }
 
     int min = 0;
@@ -107,6 +98,11 @@ int main() {
     }
 
     cout << seeds[min] << endl;
+
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+
+    cout << duration.count() << " s";
 
     return 0;
 }
