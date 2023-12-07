@@ -18,6 +18,22 @@ typedef enum {
     FIVE_OF_A_KIND
 } Type;
 
+typedef enum {
+    CARD_2,
+    CARD_3,
+    CARD_4,
+    CARD_5,
+    CARD_6,
+    CARD_7,
+    CARD_8,
+    CARD_9,
+    CARD_T,
+    CARD_J,
+    CARD_Q,
+    CARD_K,
+    CARD_A
+} CardValue;
+
 typedef struct {
     string cards;
     int bid;
@@ -28,10 +44,12 @@ bool compareHands(Hand* h1, Hand* h2); // Return true if h1 worth more than h2 /
 int main() {
     auto startChrono = chrono::high_resolution_clock::now();
 
-    ifstream file("inputs/sample.txt");
+    ifstream file("inputs/puzzle.txt");
     string line;
 
     vector<Hand> hands;
+
+    int sum = 0;
 
     while (getline(file, line)) {
         istringstream ss(line);
@@ -48,7 +66,7 @@ int main() {
         else {
             bool placed = false;
             for (int i = 0; i < hands.size(); i++) {
-                if (placed == false && compareHands(&hands[i], &hand)) {
+                if (compareHands(&hands[i], &hand)) {
                     hands.insert(hands.begin() + i, hand);
                     placed = true;
                     break;
@@ -62,10 +80,15 @@ int main() {
 
     file.close();
 
+    for (int i = 0; i < hands.size(); i++) {
+        sum += (i + 1) * hands[i].bid;
+    }
+
     auto endChrono = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<std::chrono::duration<double>>(endChrono - startChrono);
 
-    cout << duration.count() << " s";
+    cout << sum << endl;
+    cout << duration.count() << endl;
 
     return 0;
 }
@@ -163,6 +186,38 @@ bool compareHands(Hand* h1, Hand* h2) {
     }
     else if (count2.size() == 4) {
         h2Type = ONE_PAIR;
+    }
+
+    if (h1Type > h2Type) {
+        return true;
+    }
+    else if (h1Type < h2Type) {
+        return false;
+    }
+    else {
+        map<char, CardValue> values;
+        values.insert(pair<char, CardValue>('2', CARD_2));
+        values.insert(pair<char, CardValue>('3', CARD_3));
+        values.insert(pair<char, CardValue>('4', CARD_4));
+        values.insert(pair<char, CardValue>('5', CARD_5));
+        values.insert(pair<char, CardValue>('6', CARD_6));
+        values.insert(pair<char, CardValue>('7', CARD_7));
+        values.insert(pair<char, CardValue>('8', CARD_8));
+        values.insert(pair<char, CardValue>('9', CARD_9));
+        values.insert(pair<char, CardValue>('T', CARD_T));
+        values.insert(pair<char, CardValue>('J', CARD_J));
+        values.insert(pair<char, CardValue>('Q', CARD_Q));
+        values.insert(pair<char, CardValue>('K', CARD_K));
+        values.insert(pair<char, CardValue>('A', CARD_A));
+
+        for (int i = 0; i < 5; i++) {
+            if (values[h1->cards[i]] > values[h2->cards[i]]) {
+                return true;
+            }
+            else if (values[h1->cards[i]] < values[h2->cards[i]]) {
+                return false;
+            }
+        }
     }
 
     return false;
