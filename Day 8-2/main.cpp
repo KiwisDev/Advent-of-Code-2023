@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
-#include <Windows.h>
 
 using namespace std;
 
